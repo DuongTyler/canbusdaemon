@@ -4,8 +4,36 @@ use std::env;
 use std::time::Duration;
 use std::convert::TryInto;
 use std::collections::HashMap;
-
 mod event_listener;
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    #[test]
+    fn check_populate () {
+        let canframe = populate_canframe(&[u8::from(0xEF), 0xBE, 0xAD, 0xDE,       //Magic
+                                            0xA0, 0xB0, 0xC0, 0xD0,     //id
+                                            0x32, 0x00, 0x00, 0x00,     //frame type
+                                            0x08, 0x00, 0x00, 0x00,     //len
+                                            0x0A, 0x0B, 0x0C, 0x0D, 0x0E, 0x0F, 0x1A, 0x1B  //data
+                                            ]);
+        assert_eq!(canframe.magic, 0xDEADBEEF);
+        assert_eq!(canframe.id, 0xD0C0B0A0);
+        assert_eq!(canframe.frame_type, 0x32);
+        assert_eq!(canframe.len, 0x8);
+    }
+
+    #[test]
+    #[should_panic]
+    fn check_populate_panic_bad_magic () {
+        populate_canframe(&[u8::from(0xFF), 0xBE, 0xAD, 0xDE,       //Bad Magic
+                                            0xA0, 0xB0, 0xC0, 0xD0,     //id
+                                            0x32, 0x00, 0x00, 0x00,     //frame type
+                                            0x08, 0x00, 0x00, 0x00,     //len
+                                            0x0A, 0x0B, 0x0C, 0x0D, 0x0E, 0x0F, 0x1A, 0x1B  //data
+                                            ]);
+    }
+}
 
 struct CanFrame {
     magic: u32,
@@ -18,8 +46,8 @@ struct CanFrame {
 fn populate_canframe(buf: &[u8;mem::size_of::<CanFrame>()]) -> CanFrame {
     let mut frame: CanFrame = CanFrame {
         magic: 0x0,
-        id: u32::MAX,
-        frame_type: u32::MAX,
+        id: 0x0,
+        frame_type: 0x0,
         len: 0x0,
         data: [0;8],
     };
@@ -35,10 +63,10 @@ fn populate_canframe(buf: &[u8;mem::size_of::<CanFrame>()]) -> CanFrame {
     }
     let id = &buf[4..8].try_into().expect("incorrect id len");
     frame.id = u32::from_le_bytes(*id);
-    let len = &buf[8..12].try_into().expect("incorrect type len");
-    frame.len = u32::from_le_bytes(*len);
-    let frame_type = &buf[12..16].try_into().expect("incorrect type len");
+    let frame_type = &buf[8..12].try_into().expect("incorrect type len");
     frame.frame_type = u32::from_le_bytes(*frame_type);
+    let len = &buf[12..16].try_into().expect("incorrect type len");
+    frame.len = u32::from_le_bytes(*len);
     let data = &buf[16..24].try_into().expect("wrong data size");
     frame.data = *data;
     return frame;
@@ -52,8 +80,8 @@ fn main() {
     }
 
     let honda_sensor_hashmap = HashMap::from([
-        (0x0AF87010, event_listener::light_event as fn([u8;8])),
-        (0x12F95757, event_listener::steering_wheel_control_event as fn([u8;8])),
+        (0x0AF87010, event_listener::light_event as fn([u8;8]) -> u8),
+        (0x12F95757, event_listener::steering_wheel_control_event as fn([u8;8]) -> u8),
     ]);
 
     let ports = serialport::available_ports().unwrap();
@@ -73,7 +101,7 @@ fn main() {
     loop {
         let mut buf = [0;mem::size_of::<CanFrame>()];
         arduino_serial.read(&mut buf)
-            .expect("[ERRO] fail to get id");
+            .expect("[ERRO] Failed to get id");
 
         let frame = populate_canframe(&buf);
 
