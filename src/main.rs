@@ -50,13 +50,11 @@ fn main() {
     if args.len() > 1 {
         port_name = args[1].clone();
     }
-    //event_listener::steering_wheel_control_event([0x0,0x7A,0x0,0x0,0x0,0x0,0x0,0x0]);
-    event_listener::headlight_event([0x0,0x7A,0x0,0x0,0x0,0x0,0x0,0x0]);
-    let sensor_listeners = HashMap::from([
-        (0x0AF87010, event_listener::headlight_event as fn([u8;8])),
+
+    let honda_sensor_hashmap = HashMap::from([
+        (0x0AF87010, event_listener::light_event as fn([u8;8])),
         (0x12F95757, event_listener::steering_wheel_control_event as fn([u8;8])),
     ]);
-
 
     let ports = serialport::available_ports().unwrap();
     if port_name == "" {
@@ -79,7 +77,7 @@ fn main() {
 
         let frame = populate_canframe(&buf);
 
-        match sensor_listeners.get(&frame.id) {
+        match honda_sensor_hashmap.get(&frame.id) {
             Some(func) => func(frame.data),
             None => continue 
         };

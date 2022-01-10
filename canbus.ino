@@ -61,6 +61,7 @@ void setup() {
     pinMode(LED_BUILTIN, OUTPUT);
     digitalWrite(LED_BUILTIN, LOW);
 
+    //B-CAN might be 125kbps, and f-can is probably 500kbps. Check wiring diagrams for your radio.
     while (CAN_OK != CAN.begin(CAN_125KBPS)) {             // init can bus : baudrate = 500k
         digitalWrite(LED_BUILTIN, LOW);
         delay(100);
