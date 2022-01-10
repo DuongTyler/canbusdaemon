@@ -1,10 +1,11 @@
 use serialport;
 use std::mem;
+use std::env;
 use std::time::Duration;
 use std::convert::TryInto;
 use std::collections::HashMap;
 
-mod eventListener;
+mod event_listener;
 
 struct CanFrame {
     magic: u32,
@@ -44,36 +45,43 @@ fn populate_canframe(buf: &[u8;mem::size_of::<CanFrame>()]) -> CanFrame {
 }
 
 fn main() {
-    eventListener::headlight_event([1,1,1,1,1,1,1,1]);
+    let args: Vec<String> = env::args().collect();
+    let mut port_name = String::new();
+    if args.len() > 1 {
+        port_name = args[1].clone();
+    }
+    //event_listener::steering_wheel_control_event([0x0,0x7A,0x0,0x0,0x0,0x0,0x0,0x0]);
+    event_listener::headlight_event([0x0,0x7A,0x0,0x0,0x0,0x0,0x0,0x0]);
     let sensor_listeners = HashMap::from([
-        (0x0AF87010, eventListener::headlight_event),
-        //(0x12F95757, eventListener::steering_wheel_control_event),
+        (0x0AF87010, event_listener::headlight_event as fn([u8;8])),
+        (0x12F95757, event_listener::steering_wheel_control_event as fn([u8;8])),
     ]);
 
 
     let ports = serialport::available_ports().unwrap();
-    let mut port_name = String::new();
-    for i in ports.iter() {
-        println!("{:?}",i);
-        port_name = i.port_name.clone();
+    if port_name == "" {
+        for i in ports.iter() {
+            println!("{:?}",i);
+            port_name = i.port_name.clone();
+        }
     }
-    println!("reading from {}", port_name);
+    println!("[INFO] reading from {}", port_name);
     let mut arduino_serial = serialport::new(port_name, 115200).open()
-        .expect("[ERR] Failed to open port");
+        .expect("[ERRO] Failed to open port");
     // if serial data isn't constantly streaming, we time out.
     arduino_serial.set_timeout(Duration::new(1000000000,0))
-        .expect("failed to set new timeout");
+        .expect("[ERRO] failed to set new timeout");
 
     loop {
         let mut buf = [0;mem::size_of::<CanFrame>()];
         arduino_serial.read(&mut buf)
-            .expect("fail to get id");
+            .expect("[ERRO] fail to get id");
 
         let frame = populate_canframe(&buf);
 
         match sensor_listeners.get(&frame.id) {
             Some(func) => func(frame.data),
-            None => println!("No Entry for this ID")
+            None => continue 
         };
     }
 }
