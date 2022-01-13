@@ -14,5 +14,3 @@ path = "src/reader/main.rs"
 [dependencies]
 serialport = "4.0.1"
 enigo = "0.0.14"
-gtk = "*"
-glib = "*"
