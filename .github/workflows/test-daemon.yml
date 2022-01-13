@@ -17,7 +17,7 @@ jobs:
         run: sudo apt update
 
       - name: install dependencies
-        run: sudo apt install -y libudev-dev librust-pango-sys-dev librust-atk-sys-dev
+        run: sudo apt install -y libudev-dev librust-pango-sys-dev librust-atk-sys-dev librust-gdk-sys-dev
 
       - name: Run cargo tests
         uses: actions-rs/cargo@v1
