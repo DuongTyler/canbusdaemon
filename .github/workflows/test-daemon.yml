@@ -2,15 +2,16 @@ name: Daemon Test
 
 on:
   push:
-    branches: [ main ]
+    branches: [ master ]
   pull_request:
-    branches: [ main ]
+    branches: [ master ]
 jobs:
-  build:
+  test:
+    name: Test
     runs-on: ubuntu-latest
     steps:
       - name: Check out code
-      - uses: actions/checkout@v2
+        uses: actions/checkout@v2
 
       - name: Run cargo tests
         uses: actions-rs/cargo@v1
