@@ -18,4 +18,4 @@ I'm pretty sure that there's no gear sensor (for detecting reverse gear) that co
 
 Also, I'm really stupid, so this might not be as efficient as it could be. If you feel like giving me pointers on how to code more efficiently, I'd love to hear feedback. I'm still a student with much to learn.
 
-Oh, and this code is under the MIT license
+My code in the src directory is licensed under the MIT license. The arduino example code was modified from the SEEED example library code and falls under whatever license they have.
