@@ -20,13 +20,6 @@ fn main() {
 
     let mut known_sensors: HashMap<u32, SensorNumMap> = HashMap::new();
 
-    let ports = serialport::available_ports().unwrap();
-    if port_name == "" {
-        for i in ports.iter() {
-            println!("{:?}",i);
-            port_name = i.port_name.clone();
-        }
-    }
     println!("[INFO] reading from {}", port_name);
     let mut arduino_serial = serialport::new(port_name, 115200).open()
         .expect("[ERRO] Failed to open port");
