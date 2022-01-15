@@ -34,7 +34,7 @@ fn main() {
         let frame = canframe::populate_canframe(&buf);
 
         let len: usize = known_sensors.len();
-        let mut _index: usize = 1;
+        let mut _index: usize = 0;
         match known_sensors.get(&frame.id) {
             Some(x) => _index = x.index, //already has an index
             None => {
