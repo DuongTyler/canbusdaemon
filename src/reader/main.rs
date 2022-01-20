@@ -29,7 +29,7 @@ fn main() {
     print!("\x1B[2J");
     loop {
         let mut buf = [0;mem::size_of::<canframe::CanFrame>()];
-        arduino_serial.read(&mut buf)
+        arduino_serial.read_exact(&mut buf)
             .expect("[ERRO] Failed to get id");
         let frame = canframe::populate_canframe(&buf);
 
