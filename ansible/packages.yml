@@ -1,0 +1,4 @@
+packages:
+    - libxdo-dev
+    - pkg-config
+    - libudev-dev

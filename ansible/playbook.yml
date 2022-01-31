@@ -1,0 +1,60 @@
+---
+- hosts: openauto
+  tasks:
+
+      - name: "Include variables"
+        include_vars:
+          file: "vars.yml"
+
+      - name: "Include variables"
+        include_vars:
+          file: "packages.yml"
+
+      - name: "Update the system"
+        become: yes
+        apt:
+          update_cache: yes
+          upgrade: yes
+
+      - name: "Install packages"
+        become: yes
+        apt:
+          name: "{{ item }}"
+          state: latest
+        loop: "{{ packages }}"
+
+      - name: "Pull from git repo"
+        become: no
+        git:
+          repo: "https://github.com/DuongTyler/canbusdaemon"
+          dest: "/home/{{ user }}/canbusdaemon"
+          update: yes
+
+      - name: "download install script for rust"
+        become: no
+        ansible.builtin.get_url:
+          url: "https://sh.rustup.rs"
+          dest: /tmp/rustinstall.sh
+          mode: 0700
+
+      - name: "install rust"
+        become: no
+        ansible.builtin.shell:
+          cmd: /tmp/rustinstall.sh -y
+          creates: "/home/{{ user }}/.cargo/bin"
+
+      - name: "Build daemon"
+        become: no
+        ansible.builtin.shell:
+          cmd: "RUSTUP_TOOLCHAIN=stable PATH=\"/home/{{ user }}/.cargo/bin:$PATH\" /home/{{ user }}/.cargo/bin/cargo build --release"
+          chdir: "/home/{{ user }}/canbusdaemon"
+
+      - name: "install systemd service"
+        become: yes
+        ansible.builtin.copy:
+          remote_src: yes
+          src: "/home/{{ user }}/canbusdaemon/ansible/canbusdaemon.service"
+          dest: "/etc/systemd/system/canbusdaemon.service"
+          owner: root
+          group: root
+          mode: 0644
