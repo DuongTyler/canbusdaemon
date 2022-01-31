@@ -52,7 +52,7 @@ pub fn populate_canframe(buf: &[u8;mem::size_of::<CanFrame>()]) -> CanFrame {
     if frame.magic != 0xDEADBEEF {
         println!("Magic Incorrect: {:x}", frame.magic);
         for i in buf {
-            print!("{:x}", i)
+            print!("{:x}", i);
         }
         panic!("Magic is Incorrect. Cannot correct.");
     }
