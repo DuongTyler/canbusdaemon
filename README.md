@@ -5,7 +5,7 @@ This code aims to connect an arduino uno using an inland canbus hat with a raspb
 
 The canbus IDs are for a 2012 Honda Civic Sedan. I don't intend on trying to decipher any other car canbus unless someone wants to gift me a car :D.
 
-## !!! USE THIS SOFTWARE AT YOUR OWN RISK. I TAKE NO RESPONSIBILITY FOR YOUR DUMB ASS BRICKING YOUR CAR. YOU HAVE BEEN WARNED. !!!
+## !!! USE THIS SOFTWARE AT YOUR OWN RISK. I TAKE NO RESPONSIBILITY FOR BRICKING YOUR CAR. YOU HAVE BEEN WARNED. !!!
 
 # How to use this software
 Inspect the arduino code, make sure it is using the right baudrate and spi pins for your arduino and modify if needed. The arduino transmits a canbus sensor struct, but it's transmitted in a little endian byte order, so if you're modifying something with the communication between the arduino and the pi, keep this in mind.
